@@ -27,15 +27,15 @@ scene.add(rootNode);
 const circleRadius = 7.5;
 
 //Load Arrow Textures
-const leftArrowTexture = textureLoader.load('left.png');
-const rightArrowTexture = textureLoader.load('right.png');
+const leftArrowTexture = textureLoader.load('images/left.png');
+const rightArrowTexture = textureLoader.load('images/right.png');
 
 let count = 8;
 const artworkHeight = 3;
 const artworkDepth = 0.001;
 for (let i = 0; i < count; i++){
     //Define Texture
-    const texture = textureLoader.load(images[i]);
+    const texture = textureLoader.load("images/" + images[i]);
     texture.colorSpace = THREE.SRGBColorSpace;
 
     //Add Base Node 
@@ -45,7 +45,7 @@ for (let i = 0; i < count; i++){
 
     //Calculate Artworks aspect ratio
     const img = new Image();
-    img.src = images[i];
+    img.src = "images/" + images[i];
     const aspectRatio = img.width / img.height;
     const artworkWidth = artworkHeight*aspectRatio;
 
