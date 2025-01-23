@@ -48,17 +48,36 @@ function loadArtistPicture(i, baseNode, artworkWidth) {
             const aspectRatio = artistPictureImg.width / artistPictureImg.height;
             const artistPicturekWidth = artistPictureHeight * aspectRatio;
 
+            //Add artist picture
             const artistPicture = new THREE.Mesh(
                 new THREE.BoxGeometry(artistPicturekWidth, artistPictureHeight, artistPictureDepth),
-                new THREE.MeshStandardMaterial({
+                new THREE.MeshBasicMaterial({
                     map: artistPictureTexture,
-                    transparent: true
+                    transparent: true,
+                    color: 0xaaaaaa,
+                    opacity: 0
                 })
             );
             artistPicture.name = `Picture`;
             artistPicture.position.z = -circleRadius;
             artistPicture.position.y = 1;
             artistPicture.position.x = (artworkWidth / 2) + 2;
+
+            //Add artist pictures border
+            const artistBorder = new THREE.Mesh(
+                new THREE.BoxGeometry(artistPicturekWidth + 0.1, artistPictureHeight + 0.1, artistPictureDepth),
+                new THREE.MeshBasicMaterial({
+                    color: 0x202020,
+                    transparent: true,
+                    opacity: 0
+                })
+            );
+            artistBorder.name = `PictureBorder`;
+            artistBorder.position.z = -circleRadius - 0.001;
+            artistBorder.position.y = 1;
+            artistBorder.position.x = (artworkWidth / 2) + 2;
+            baseNode.add(artistBorder);
+
             baseNode.add(artistPicture);
             resolve();
         };
@@ -346,7 +365,7 @@ window.addEventListener('wheel', (event) => {
                                 .to({ opacity: 0 }, 500)
                                 .easing(Easing.Quadratic.Out)
                                 .start();
-                        } else if (child.name === 'Picture'){
+                        } else if (child.name === 'Picture' || child.name === 'PictureBorder'){
                             const shouldShowPicture = targetX === MAX_RIGHT && isVisibleByDegrees;
                             new Tween(child.material)
                                 .to({ opacity: shouldShowPicture ? 1 : 0 }, 500)
@@ -371,7 +390,7 @@ window.addEventListener('wheel', (event) => {
             // Restore opacity for everything except Info text when fully zoomed out
             rootNode.children.forEach(baseNode => {
                 baseNode.children.forEach(child => {
-                    if (child.material && child.name !== 'Picture') {
+                    if (child.material && child.name !== 'Picture' && child.name !== 'PictureBorder') {
                         new Tween(child.material)
                             .to({ opacity: 1 }, 500)
                             .easing(Easing.Quadratic.Out)
