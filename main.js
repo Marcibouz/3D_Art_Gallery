@@ -38,136 +38,127 @@ const artworkDepth = 0.001;
 const artistPictureHeight = 1;
 const artistPictureDepth = 0.001;
 
-//Load all Textures in advance
-function preloadImages(urls, callback) {
-    let loadedCount = 0;
-    const totalCount = urls.length;
+function loadArtistPicture(i, baseNode, artworkWidth) {
+    return new Promise((resolve, reject) => {
+        const artistPictureTexture = textureLoader.load("images/" + artistPictures[i]);
+        artistPictureTexture.colorSpace = THREE.SRGBColorSpace;
 
-    urls.forEach((url) => {
-        textureLoader.load(
-            url,
-            () => {
-                loadedCount++;
-                if (loadedCount === totalCount) {
-                    callback(); // Return when all images are loaded
-                }
-            }
-        );
+        const artistPictureImg = new Image();
+        artistPictureImg.onload = () => {
+            const aspectRatio = artistPictureImg.width / artistPictureImg.height;
+            const artistPicturekWidth = artistPictureHeight * aspectRatio;
+
+            const artistPicture = new THREE.Mesh(
+                new THREE.BoxGeometry(artistPicturekWidth, artistPictureHeight, artistPictureDepth),
+                new THREE.MeshStandardMaterial({
+                    map: artistPictureTexture,
+                    transparent: true
+                })
+            );
+            artistPicture.name = `Picture`;
+            artistPicture.position.z = -circleRadius;
+            artistPicture.position.y = 1;
+            artistPicture.position.x = (artworkWidth / 2) + 2;
+            baseNode.add(artistPicture);
+            resolve();
+        };
+        artistPictureImg.onerror = reject;
+        artistPictureImg.src = "images/" + artistPictures[i];
     });
 }
 
-const artworkUrls = artworks.map(name => `images/${name}`);
-const artistPictureUrls = artistPictures.map(name => `images/${name}`);
-const arrowUrls = arrows.map(name => `images/${name}`);
-const allImageUrls = [...artworkUrls, ...artistPictureUrls, ...arrowUrls];
+function initializeScene() {
+    const scenePromises = [];
 
-//Load Arrow Textures
-const leftArrowTexture = textureLoader.load('images/' + arrows[0]);
-const rightArrowTexture = textureLoader.load('images/' + arrows[1]);
-
-preloadImages(allImageUrls, () => {
-    // Now, you can safely create your scene since all images are loaded
-    initializeScene();
-});
-
-function initializeScene(){
     for (let i = 0; i < count; i++) {
-        // Define Textures
         const artWorkTexture = textureLoader.load("images/" + artworks[i]);
         artWorkTexture.colorSpace = THREE.SRGBColorSpace;
-        const artistPictureTexture = textureLoader.load("images/" + artistPictures[i]);
-        artistPictureTexture.colorSpace = THREE.SRGBColorSpace;
-    
-        // Add Base Node
-        const baseNode = new THREE.Object3D();
-        baseNode.rotation.y = i * (2 * Math.PI / count);
-        rootNode.add(baseNode);
-    
-        // Get the Images to calculate the aspect ratios
-        const artworkImg = new Image();
-        artworkImg.src = "images/" + artworks[i];
-        const artistPictureImg = new Image();
-        artistPictureImg.src = "images/" + artistPictures[i];
-    
-        artworkImg.onload = () => {
-            //Calculate the aspect ratio
-            const aspectRatio = artworkImg.width / artworkImg.height;
-            const artworkWidth = artworkHeight * aspectRatio;
-    
-            // Add Artworks as children of Base Node
-            const artwork = new THREE.Mesh(
-                new THREE.BoxGeometry(artworkWidth, artworkHeight, artworkDepth),
-                new THREE.MeshStandardMaterial({
-                    map: artWorkTexture,
-                    transparent: true
-                })
-            );
-            artwork.name = `Art_${i}`;
-            artwork.position.z = -circleRadius;
-            baseNode.add(artwork);
-    
-            // Add Border as children of Base Node
-            const artworkBorder = new THREE.Mesh(
-                new THREE.BoxGeometry(artworkWidth + 0.2, artworkHeight + 0.2, artworkDepth),
-                new THREE.MeshStandardMaterial({
-                    color: 0x202020,
-                    transparent: true
-                })
-            );
-            artworkBorder.name = `ArtworkBorder_${i}`;
-            artworkBorder.position.z = -circleRadius - 0.001;
-            baseNode.add(artworkBorder);
-    
-            artistPictureImg.onload = () => {
-                //Calculate the aspect ratio
-                const aspectRatio = artistPictureImg.width / artistPictureImg.height;
-                const artistPicturekWidth = artistPictureHeight * aspectRatio;
-    
-                //Add picture of artist to Base Node
-                const artworkPicture = new THREE.Mesh(
-                    new THREE.BoxGeometry(artistPicturekWidth, artistPictureHeight, artistPictureDepth),
+
+        const artworkPromise = new Promise((resolve, reject) => {
+            const artworkImg = new Image();
+            artworkImg.onload = () => {
+                const aspectRatio = artworkImg.width / artworkImg.height;
+                const artworkWidth = artworkHeight * aspectRatio;
+
+                const baseNode = new THREE.Object3D();
+                baseNode.rotation.y = i * (2 * Math.PI / count);
+                rootNode.add(baseNode);
+
+                // Create artwork mesh
+                const artwork = new THREE.Mesh(
+                    new THREE.BoxGeometry(artworkWidth, artworkHeight, artworkDepth),
                     new THREE.MeshStandardMaterial({
-                        map: artistPictureTexture,
-                        transparent: true,
-                        opacity: 0
+                        map: artWorkTexture,
+                        transparent: true
                     })
                 );
-                artworkPicture.name = `Picture`;
-                artworkPicture.position.z = -circleRadius;
-                artworkPicture.position.y = 1;
-                artworkPicture.position.x = (artworkWidth / 2) + 2;
-                baseNode.add(artworkPicture);
-    
+                artwork.name = `Art_${i}`;
+                artwork.position.z = -circleRadius;
+                baseNode.add(artwork);
+
+                // Create artwork border
+                const artworkBorder = new THREE.Mesh(
+                    new THREE.BoxGeometry(artworkWidth + 0.2, artworkHeight + 0.2, artworkDepth),
+                    new THREE.MeshStandardMaterial({
+                        color: 0x202020,
+                        transparent: true
+                    })
+                );
+                artworkBorder.name = `ArtworkBorder_${i}`;
+                artworkBorder.position.z = -circleRadius - 0.001;
+                baseNode.add(artworkBorder);
+
+                // Load artist picture
+                const artistPicturePromise = loadArtistPicture(i, baseNode, artworkWidth);
+
+                // Add arrows
+                const leftArrowTexture = textureLoader.load('images/' + arrows[0]);
+                const rightArrowTexture = textureLoader.load('images/' + arrows[1]);
+
+                const leftArrow = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
+                    new THREE.MeshStandardMaterial({
+                        map: leftArrowTexture,
+                        transparent: true
+                    })
+                );
+                leftArrow.name = `LeftArrow`;
+                leftArrow.userData = (i === count - 1) ? 0 : i + 1;
+                leftArrow.position.set((-artworkWidth / 2) - 0.5, 0, -circleRadius);
+                baseNode.add(leftArrow);
+
+                const rightArrow = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
+                    new THREE.MeshStandardMaterial({
+                        map: rightArrowTexture,
+                        transparent: true
+                    })
+                );
+                rightArrow.name = `RightArrow`;
+                rightArrow.userData = (i === 0) ? count - 1 : i - 1;
+                rightArrow.position.set((artworkWidth / 2) + 0.5, 0, -circleRadius);
+                baseNode.add(rightArrow);
+
+                // Resolve with artist picture promise
+                resolve(artistPicturePromise);
             };
-    
-            // Add left arrow
-            const leftArrow = new THREE.Mesh(
-                new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
-                new THREE.MeshStandardMaterial({
-                    map: leftArrowTexture,
-                    transparent: true
-                })
-            );
-            leftArrow.name = `LeftArrow`;
-            leftArrow.userData = (i === count - 1) ? 0 : i + 1;
-            leftArrow.position.set((-artworkWidth / 2) - 0.5, 0, -circleRadius);
-            baseNode.add(leftArrow);
-    
-            // Add right arrow
-            const rightArrow = new THREE.Mesh(
-                new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
-                new THREE.MeshStandardMaterial({
-                    map: rightArrowTexture,
-                    transparent: true
-                })
-            );
-            rightArrow.name = `RightArrow`;
-            rightArrow.userData = (i === 0) ? count - 1 : i - 1;
-            rightArrow.position.set((artworkWidth / 2) + 0.5, 0, -circleRadius);
-            baseNode.add(rightArrow);
-        };
+            artworkImg.onerror = reject;
+            artworkImg.src = "images/" + artworks[i];
+        });
+
+        scenePromises.push(artworkPromise);
     }
+
+    Promise.all(scenePromises)
+        .then(() => {
+            console.log("All artworks, artist pictures, and arrows loaded successfully");
+        })
+        .catch(error => {
+            console.error("Error loading scene elements:", error);
+        });
 }
+
+initializeScene();
 
 //Light
 const spotlight = new THREE.SpotLight(0xffffff, 200.0, 10.0, 0.8, 0.5);
