@@ -1,7 +1,12 @@
 import * as THREE from 'three';
 import { Reflector } from 'three/examples/jsm/Addons.js';
 import { Easing, Tween, update as updateTween } from 'tween';
-import { images, titles, artists } from './model.js';
+import { artworks, titles, artists, artistPictures, infoTexts, arrows } from './model.js';
+
+// Get HTML-Elements
+const infoTextElement =  document.getElementById('infoText');
+const titleElement = document.getElementById('title');
+const artistElement = document.getElementById('artist');
 
 //renderer settings
 const renderer = new THREE.WebGLRenderer();
@@ -26,78 +31,142 @@ const rootNode = new THREE.Object3D();
 scene.add(rootNode);
 const circleRadius = 7.5;
 
-//Load Arrow Textures
-const leftArrowTexture = textureLoader.load('images/left.png');
-const rightArrowTexture = textureLoader.load('images/right.png');
-
+//Variables for loop
 let count = 8;
 const artworkHeight = 3;
 const artworkDepth = 0.001;
-for (let i = 0; i < count; i++){
-    //Define Texture
-    const texture = textureLoader.load("images/" + images[i]);
-    texture.colorSpace = THREE.SRGBColorSpace;
+const artistPictureHeight = 1;
+const artistPictureDepth = 0.001;
 
-    //Add Base Node 
-    const baseNode = new THREE.Object3D();
-    baseNode.rotation.y = i * (2 * Math.PI / count);
-    rootNode.add(baseNode);
+//Load all Textures in advance
+function preloadImages(urls, callback) {
+    let loadedCount = 0;
+    const totalCount = urls.length;
 
-    //Calculate Artworks aspect ratio
-    const img = new Image();
-    img.src = "images/" + images[i];
-    const aspectRatio = img.width / img.height;
-    const artworkWidth = artworkHeight*aspectRatio;
+    urls.forEach((url) => {
+        textureLoader.load(
+            url,
+            () => {
+                loadedCount++;
+                if (loadedCount === totalCount) {
+                    callback(); // Return when all images are loaded
+                }
+            }
+        );
+    });
+}
 
-    //Add Border as children of Base Node
-    const border = new THREE.Mesh(
-        new THREE.BoxGeometry(artworkWidth+0.2, artworkHeight+0.2, artworkDepth),
-        new THREE.MeshStandardMaterial({
-            color: 0x202020,
-            transparent: true
-        })
-    );
-    border.name = `Border_${i}`;
-    border.position.z = -circleRadius-0.001;
-    baseNode.add(border);
+const artworkUrls = artworks.map(name => `images/${name}`);
+const artistPictureUrls = artistPictures.map(name => `images/${name}`);
+const arrowUrls = arrows.map(name => `images/${name}`);
+const allImageUrls = [...artworkUrls, ...artistPictureUrls, ...arrowUrls];
 
-    //Add artworks as children of Base Node
-    const artwork = new THREE.Mesh(
-        new THREE.BoxGeometry(artworkWidth, artworkHeight, artworkDepth),
-        new THREE.MeshStandardMaterial({
-            map: texture,
-            transparent: true
-        })
-    );
-    artwork.name = `Art_${i}`;
-    artwork.position.z = -circleRadius;
-    baseNode.add(artwork);
+//Load Arrow Textures
+const leftArrowTexture = textureLoader.load('images/' + arrows[0]);
+const rightArrowTexture = textureLoader.load('images/' + arrows[1]);
 
-    //Add left arrow
-    const leftArrow = new THREE.Mesh(
-        new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
-        new THREE.MeshStandardMaterial({
-            map: leftArrowTexture,
-            transparent: true
-        })
-    );
-    leftArrow.name = `LeftArrow`;
-    leftArrow.userData = (i === count -1) ? 0 : i + 1;
-    leftArrow.position.set((-artworkWidth / 2)-0.5, 0, -circleRadius);
-    baseNode.add(leftArrow);
+preloadImages(allImageUrls, () => {
+    // Now, you can safely create your scene since all images are loaded
+    initializeScene();
+});
 
-    //Add right arrow
-    const rightArrow = new THREE.Mesh(
-        new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
-        new THREE.MeshStandardMaterial({
-            map: rightArrowTexture,
-            transparent: true
-        })
-    );
-    rightArrow.name = `RightArrow`;
-    rightArrow.userData = (i === 0) ? count - 1 : i - 1;
-    rightArrow.position.set((artworkWidth / 2)+0.5, 0, -circleRadius);
-    baseNode.add(rightArrow);
+function initializeScene(){
+    for (let i = 0; i < count; i++) {
+        // Define Textures
+        const artWorkTexture = textureLoader.load("images/" + artworks[i]);
+        artWorkTexture.colorSpace = THREE.SRGBColorSpace;
+        const artistPictureTexture = textureLoader.load("images/" + artistPictures[i]);
+        artistPictureTexture.colorSpace = THREE.SRGBColorSpace;
+    
+        // Add Base Node
+        const baseNode = new THREE.Object3D();
+        baseNode.rotation.y = i * (2 * Math.PI / count);
+        rootNode.add(baseNode);
+    
+        // Get the Images to calculate the aspect ratios
+        const artworkImg = new Image();
+        artworkImg.src = "images/" + artworks[i];
+        const artistPictureImg = new Image();
+        artistPictureImg.src = "images/" + artistPictures[i];
+    
+        artworkImg.onload = () => {
+            //Calculate the aspect ratio
+            const aspectRatio = artworkImg.width / artworkImg.height;
+            const artworkWidth = artworkHeight * aspectRatio;
+    
+            // Add Artworks as children of Base Node
+            const artwork = new THREE.Mesh(
+                new THREE.BoxGeometry(artworkWidth, artworkHeight, artworkDepth),
+                new THREE.MeshStandardMaterial({
+                    map: artWorkTexture,
+                    transparent: true
+                })
+            );
+            artwork.name = `Art_${i}`;
+            artwork.position.z = -circleRadius;
+            baseNode.add(artwork);
+    
+            // Add Border as children of Base Node
+            const artworkBorder = new THREE.Mesh(
+                new THREE.BoxGeometry(artworkWidth + 0.2, artworkHeight + 0.2, artworkDepth),
+                new THREE.MeshStandardMaterial({
+                    color: 0x202020,
+                    transparent: true
+                })
+            );
+            artworkBorder.name = `ArtworkBorder_${i}`;
+            artworkBorder.position.z = -circleRadius - 0.001;
+            baseNode.add(artworkBorder);
+    
+            artistPictureImg.onload = () => {
+                //Calculate the aspect ratio
+                const aspectRatio = artistPictureImg.width / artistPictureImg.height;
+                const artistPicturekWidth = artistPictureHeight * aspectRatio;
+    
+                //Add picture of artist to Base Node
+                const artworkPicture = new THREE.Mesh(
+                    new THREE.BoxGeometry(artistPicturekWidth, artistPictureHeight, artistPictureDepth),
+                    new THREE.MeshStandardMaterial({
+                        map: artistPictureTexture,
+                        transparent: true,
+                        opacity: 0
+                    })
+                );
+                artworkPicture.name = `Picture`;
+                artworkPicture.position.z = -circleRadius;
+                artworkPicture.position.y = 1;
+                artworkPicture.position.x = (artworkWidth / 2) + 2;
+                baseNode.add(artworkPicture);
+    
+            };
+    
+            // Add left arrow
+            const leftArrow = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
+                new THREE.MeshStandardMaterial({
+                    map: leftArrowTexture,
+                    transparent: true
+                })
+            );
+            leftArrow.name = `LeftArrow`;
+            leftArrow.userData = (i === count - 1) ? 0 : i + 1;
+            leftArrow.position.set((-artworkWidth / 2) - 0.5, 0, -circleRadius);
+            baseNode.add(leftArrow);
+    
+            // Add right arrow
+            const rightArrow = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.3, artworkDepth),
+                new THREE.MeshStandardMaterial({
+                    map: rightArrowTexture,
+                    transparent: true
+                })
+            );
+            rightArrow.name = `RightArrow`;
+            rightArrow.userData = (i === 0) ? count - 1 : i - 1;
+            rightArrow.position.set((artworkWidth / 2) + 0.5, 0, -circleRadius);
+            baseNode.add(rightArrow);
+        };
+    }
 }
 
 //Light
@@ -131,15 +200,16 @@ function rotateGallery(direction, newIndex){
         .start()
         .onStart(() => {
             currentlyRotating = true;
-            document.getElementById('title').style.opacity = 0;
-            document.getElementById('artist').style.opacity = 0;
+            titleElement.style.opacity = 0;
+            artistElement.style.opacity = 0;
         })
         .onComplete(() => {
             currentlyRotating = false;
-            document.getElementById('title').innerText = titles[newIndex];
-            document.getElementById('artist').innerText = artists[newIndex];
-            document.getElementById('title').style.opacity = 1;
-            document.getElementById('artist').style.opacity = 1;
+            titleElement.innerText = titles[newIndex];
+            artistElement.innerText = artists[newIndex];
+            document.getElementById('infoText').innerText = infoTexts[newIndex];
+            titleElement.style.opacity = 1;
+            artistElement.style.opacity = 1;
         })
 }
 
@@ -209,7 +279,7 @@ window.addEventListener('click', (event) => {
 window.addEventListener('wheel', (event) => {
     event.preventDefault();
 
-    //Only allow zoom if we are not currenlty rotating
+    //Only allow zoom if we are not currently rotating
     if (!currentlyRotating){
         // Get current camera position
         const currentZ = camera.position.z;
@@ -222,6 +292,7 @@ window.addEventListener('wheel', (event) => {
         // Add a small threshold for comparing floating point values
         const THRESHOLD = 0.1;
         const isAtMaxZoom = Math.abs(currentZ - MAX_ZOOM) < THRESHOLD;
+        const isAtMaxRight = Math.abs(currentX - MAX_RIGHT) < THRESHOLD;
         const isAtMinRight = Math.abs(currentX - MIN_RIGHT) < THRESHOLD;
         
         if (event.deltaY > 0) { // Scrolling down/away - zoom out
@@ -254,19 +325,27 @@ window.addEventListener('wheel', (event) => {
 
         //Fade Title and Artist
         if (targetZ <= -3.5){
-            document.getElementById('title').style.opacity = 0;
-            document.getElementById('artist').style.opacity = 0;
+            titleElement.style.opacity = 0;
+            artistElement.style.opacity = 0;
         } else{
-            document.getElementById('title').style.opacity = 1;
-            document.getElementById('artist').style.opacity = 1;
+            titleElement.style.opacity = 1;
+            artistElement.style.opacity = 1;
         }
 
-        //Fade Arrows and other Artworks
+        //Fade Infotext
+        if (targetX === MAX_RIGHT){
+            infoTextElement.style.opacity = 1;
+        } else{
+            infoTextElement.style.opacity = 0;
+        }
+
+        //Fade Arrows, Artworks and Infotext
         if (targetZ < MIN_ZOOM){
-            // Find and fade out non-centered artworks
+            // Find and fade out non-centered elements
             rootNode.children.forEach((baseNode, index) => {
                 // Calculate the angle between the baseNode's forward direction and negative z-axis
                 let degrees = calculateAngleToZAxis(baseNode);
+                let isVisibleByDegrees = Math.abs(degrees) < 10;
                 
                 // Fade based on whether the artwork is centered
                 baseNode.children.forEach(child => {
@@ -276,8 +355,14 @@ window.addEventListener('wheel', (event) => {
                                 .to({ opacity: 0 }, 500)
                                 .easing(Easing.Quadratic.Out)
                                 .start();
-                        } else{
-                            const opacity = Math.abs(degrees) < 20 ? 1 : 0;
+                        } else if (child.name === 'Picture'){
+                            const shouldShowPicture = targetX === MAX_RIGHT && isVisibleByDegrees;
+                            new Tween(child.material)
+                                .to({ opacity: shouldShowPicture ? 1 : 0 }, 500)
+                                .easing(Easing.Quadratic.Out)
+                                .start();
+                        } else {
+                            const opacity = isVisibleByDegrees ? 1 : 0; //Fade out everything except the baseNode right in Front of us
                         
                             // Create a tween for smooth opacity transition
                             new Tween(child.material)
@@ -291,11 +376,11 @@ window.addEventListener('wheel', (event) => {
                     }
                 });
             });
-        } else{
-            // Restore opacity of all elements
+        } else {
+            // Restore opacity for everything except Info text when fully zoomed out
             rootNode.children.forEach(baseNode => {
                 baseNode.children.forEach(child => {
-                    if (child.material) {
+                    if (child.material && child.name !== 'Picture') {
                         new Tween(child.material)
                             .to({ opacity: 1 }, 500)
                             .easing(Easing.Quadratic.Out)
@@ -308,5 +393,6 @@ window.addEventListener('wheel', (event) => {
 });
 
 //Initialize first title and artist
-document.getElementById('title').innerText = titles[0];
-document.getElementById('artist').innerText = artists[0];
+titleElement.innerText = titles[0];
+artistElement.innerText = artists[0];
+infoTextElement.innerText = infoTexts[0];

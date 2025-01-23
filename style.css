@@ -13,6 +13,22 @@ h1, h2 {
     transition: opacity 0.5s ease-in-out;
 }
 
+#infoText {
+    color: white;
+    text-align: left;
+    width: 37%;
+    top: 50%;
+    right: 2em;
+    position: fixed;
+    line-height: 1.2;
+    word-wrap: break-word;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    font-size: 3em;
+    font-family: 'Raleway';
+    font-weight: 100;
+}
+
 #title {
     position: fixed;
     font-size: 6em;
