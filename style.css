@@ -29,13 +29,13 @@ h1, h2 {
 
 #title {
     position: fixed;
-    font-size: clamp(2rem, 6vh, 6em);
+    font-size: clamp(4rem, 6vh, 6em);
     top: 0.5em;
 }
 
 #artist {
     position: fixed;
-    font-size: clamp(1rem, 3vh, 3em);
+    font-size: clamp(2rem, 4vh, 3em);
     color: gray;
     top: 4em;
 }
