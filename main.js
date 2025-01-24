@@ -75,7 +75,32 @@ function loadArtistPicture(i, baseNode, artworkWidth) {
             artistBorder.name = `PictureBorder`;
             artistBorder.position.z = -circleRadius - 0.001;
             artistBorder.position.y = 1;
-            artistBorder.position.x = (artworkWidth / 2) + 2;
+
+            if(i === 0){
+                artistPicture.position.x = (artworkWidth / 2) + 2;
+                artistBorder.position.x = (artworkWidth / 2) + 2;
+            }else if (i === 1){
+                artistPicture.position.x = (artworkWidth / 2) + 1.6;
+                artistBorder.position.x = (artworkWidth / 2) + 1.6;
+            }else if (i === 2){
+                artistPicture.position.x = (artworkWidth / 2) + 2.3;
+                artistBorder.position.x = (artworkWidth / 2) + 2.3;
+            }else if (i === 3){
+                artistPicture.position.x = (artworkWidth / 2) + 1.8;
+                artistBorder.position.x = (artworkWidth / 2) + 1.8;
+            }else if (i === 4){
+                artistPicture.position.x = (artworkWidth / 2) + 2.3;
+                artistBorder.position.x = (artworkWidth / 2) + 2.3;
+            }else if (i === 5){
+                artistPicture.position.x = (artworkWidth / 2) + 2;
+                artistBorder.position.x = (artworkWidth / 2) + 2;
+            }else if (i === 6){
+                artistPicture.position.x = (artworkWidth / 2) + 2.9;
+                artistBorder.position.x = (artworkWidth / 2) + 2.9;
+            }else{
+                artistPicture.position.x = (artworkWidth / 2) + 2.2;
+                artistBorder.position.x = (artworkWidth / 2) + 2.2;
+            }
             baseNode.add(artistBorder);
 
             baseNode.add(artistPicture);
@@ -92,6 +117,8 @@ function initializeScene() {
     for (let i = 0; i < count; i++) {
         const artWorkTexture = textureLoader.load("images/" + artworks[i]);
         artWorkTexture.colorSpace = THREE.SRGBColorSpace;
+        const artWorkBorderTexture = textureLoader.load("images/artworkborder.png");
+        artWorkBorderTexture.colorSpace = THREE.SRGBColorSpace;
 
         const artworkPromise = new Promise((resolve, reject) => {
             const artworkImg = new Image();
@@ -117,9 +144,9 @@ function initializeScene() {
 
                 // Create artwork border
                 const artworkBorder = new THREE.Mesh(
-                    new THREE.BoxGeometry(artworkWidth + 0.2, artworkHeight + 0.2, artworkDepth),
+                    new THREE.BoxGeometry(artworkWidth + 0.1, artworkHeight + 0.1, artworkDepth),
                     new THREE.MeshStandardMaterial({
-                        color: 0x202020,
+                        map: artWorkBorderTexture,
                         transparent: true
                     })
                 );
