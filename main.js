@@ -427,7 +427,7 @@ window.addEventListener('wheel', (event) => {
             });
         }
     }
-});
+}, { passive: false });
 
 //Initialize first title and artist
 titleElement.innerText = titles[0];
