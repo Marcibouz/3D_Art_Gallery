@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Reflector } from 'three/examples/jsm/Addons.js';
 import { Easing, Tween, update as updateTween } from 'tween';
 import { artworks, titles, artists, artistPictures, infoTexts, arrows } from './model.js';
+import Decimal from 'decimal.js';
 
 //HTML-Elements holen
 const infoTextElement =  document.getElementById('infoText');
@@ -229,10 +230,15 @@ scene.add(mirror);
 let currentlyRotating = false;
 
 //Dreht die Galerie und passt währenddessen Opacity und Inhalt der Texte an
-function rotateGallery(direction, newIndex){
-    const deltaY = direction * (2 * Math.PI / count);
+function rotateGallery(direction, newIndex) {
+    if(!currentlyRotating){
+        const deltaY = new Decimal(direction)
+        .times(new Decimal(2).times(Math.PI))
+        .div(count)
+        .toNumber();
+
     new Tween(rootNode.rotation)
-        .to({ y: rootNode.rotation.y + deltaY})
+        .to({ y: rootNode.rotation.y + deltaY })
         .easing(Easing.Quadratic.InOut)
         .start()
         .onStart(() => {
@@ -244,11 +250,13 @@ function rotateGallery(direction, newIndex){
             currentlyRotating = false;
             titleElement.innerText = titles[newIndex];
             artistElement.innerText = artists[newIndex];
-            document.getElementById('infoText').innerText = infoTexts[newIndex];
+            infoTextElement.innerText = infoTexts[newIndex];
             titleElement.style.opacity = 1;
             artistElement.style.opacity = 1;
-        })
+        });
+    }
 }
+
 
 //Animation
 function animate() {
