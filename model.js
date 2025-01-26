@@ -45,7 +45,7 @@ export const artistPictures = [
 export const infoTexts = [
     'Künstler: ' + artists[0] + '\n' + 'Titel: ' + titles[0] + '\n' + 'Jahr: 1787' + '\n' + 'Originalgröße: 129,5 x 196,2cm' + '\n' + 'Medium: Öl auf Leinwand' + '\n' + 'Ausstellungsort: Metropolitan Museum of Art,' + '\n' + 'New York',
     'Künstler: ' + artists[1] + '\n' + 'Titel: ' + titles[1] + '\n' + 'Jahr: 1485/86' + '\n' + 'Originalgröße: 172,5 x 278,5cm' + '\n' + 'Medium: Tempera auf Leinwand' + '\n' + 'Ausstellungsort: Uffizien, Florenz',
-    'Künstler: ' + artists[2] + '\n' + 'Titel: ' + titles[2] + '\n' + 'Jahr: 1884-1886' + '\n' + 'Originalgröße: 207,6 x 308cm' + '\n' + 'Medium: Öl auf Leinwand' + '\n' + 'Ausstellungsort: Art Institute of Chicago',
+    'Künstler: ' + artists[2] + '\n' + 'Titel: ' + 'Ein Sonntagnachmittag auf der Insel' + '\n' +  'La Grande Jatte' + '\n' + 'Jahr: 1884-1886' + '\n' + 'Originalgröße: 207,6 x 308cm' + '\n' + 'Medium: Öl auf Leinwand' + '\n' + 'Ausstellungsort: Art Institute of Chicago',
     'Künstler: ' + artists[3] + '\n' + 'Titel: ' + titles[3] + '\n' + 'Jahr: 1830-1832' + '\n' + 'Originalgröße: 25 x 37cm' + '\n' + 'Medium: Japanischer Farbholzschnitt',
     'Künstler: ' + artists[4] + '\n' + 'Titel: ' + titles[4] + '\n' + 'Jahr: 1889' + '\n' + 'Originalgröße: 73,7 x 92,1cm' + '\n' + 'Medium: Öl auf Leinwand' + '\n' + 'Ausstellungsort: MoMA, New York City',
     'Künstler: ' + artists[5] + '\n' + 'Titel: ' + titles[5] + '\n' + 'Jahr: 1868' + '\n' + 'Originalgröße: 180 x 305,12cm' + '\n' + 'Medium: Öl auf Leinwand' + '\n' + 'Ausstellungsort: Smithsonian American Art Museum, Washington, D.C.',
